@@ -4,8 +4,8 @@ import { deleteTodo } from '../api/todos';
 
 type Props = {
   todo: Todo;
-  activeTodoIds: number[]; // Changed to array
-  setActiveTodoIds: React.Dispatch<React.SetStateAction<number[]>>; // Updated
+  activeTodoIds: number[];
+  setActiveTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
   inputRef: React.RefObject<HTMLInputElement>;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
@@ -36,7 +36,7 @@ const TodoItem = ({
       .finally(() => {
         setActiveTodoIds(current =>
           current.filter(activeId => activeId !== todoId),
-        ); // Remove from active IDs
+        );
         inputRef.current?.focus();
       });
   };

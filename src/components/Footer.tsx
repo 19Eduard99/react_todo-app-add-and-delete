@@ -55,19 +55,29 @@ const Footer = ({
       return;
     }
 
-    const completedIds = completedTodos.map(todo => todo.id);
+    setActiveTodoIds(completedTodos.map(todo => todo.id));
 
-    setActiveTodoIds(completedIds);
+    completedTodos.forEach(completedTodo => {
+      deleteTodo(completedTodo.id)
+        .then(() => {
+          setTodos(currentTodos => {
+            return currentTodos.filter(
+              currentTodo => currentTodo.id !== completedTodo.id,
+            );
+          });
+          setActiveTodoIds(current =>
+            current.filter(id => id !== completedTodo.id),
+          );
+        })
+        .catch(() => {
+          setError('Unable to delete a todo');
+          setActiveTodoIds(current =>
+            current.filter(id => id !== completedTodo.id),
+          );
+        });
+    });
 
-    try {
-      await Promise.all(completedIds.map(id => deleteTodo(id)));
-      setTodos(currentTodos => currentTodos.filter(todo => !todo.completed));
-    } catch {
-      setError('Unable to delete a todo');
-    } finally {
-      setActiveTodoIds([]);
-      inputRef.current?.focus();
-    }
+    inputRef.current?.focus();
   };
 
   return (

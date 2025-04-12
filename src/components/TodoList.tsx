@@ -29,6 +29,7 @@ const TodoList = ({
         {displayTodos.map(todo => (
           <CSSTransition key={todo.id} timeout={300} classNames="item">
             <TodoItem
+              key={todo.id}
               todo={todo}
               activeTodoIds={activeTodoIds}
               setActiveTodoIds={setActiveTodoIds}
