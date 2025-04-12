@@ -21,7 +21,7 @@ export const App: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedNav, setSelectedNav] = useState(Filter.All);
-  const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
+  const [activeTodoIds, setActiveTodoIds] = useState<number[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const loadTodos = async () => {
@@ -55,12 +55,12 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (tempTodo) {
-      setActiveTodoId(tempTodo.id);
+      setActiveTodoIds(current => [...current, tempTodo.id]);
 
       if (tempTodo.id > 0) {
         setTodos(current => [...current, tempTodo]);
         setTempTodo(null);
-        setActiveTodoId(null);
+        setActiveTodoIds(current => current.filter(id => id !== tempTodo.id));
       }
     }
   }, [tempTodo]);
@@ -76,7 +76,7 @@ export const App: React.FC = () => {
     }
   });
 
-  const handelFilter = (e: React.MouseEvent) => {
+  const handleFilter = (e: React.MouseEvent) => {
     const filter =
       e.currentTarget.getAttribute('href')?.replace('#', '') || Filter.All;
 
@@ -86,7 +86,6 @@ export const App: React.FC = () => {
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
-
       <div className="todoapp__content">
         <Header
           inputRef={inputRef}
@@ -95,31 +94,28 @@ export const App: React.FC = () => {
           isLoading={isLoading}
           setIsLoading={setIsLoading}
         />
-
         <TodoList
           filteredTodos={filteredTodos}
-          activeTodoId={activeTodoId}
-          setActiveTodoId={setActiveTodoId}
+          activeTodoIds={activeTodoIds}
+          setActiveTodoIds={setActiveTodoIds}
           setTodos={setTodos}
           tempTodo={tempTodo}
           setError={setError}
           inputRef={inputRef}
         />
-
         {todos.length > 0 && (
           <Footer
             todos={todos}
             selectedNav={selectedNav}
-            handelFilter={handelFilter}
+            handelFilter={handleFilter}
             setError={setError}
             inputRef={inputRef}
             setTodos={setTodos}
             isLoading={isLoading}
-            setActiveTodoId={setActiveTodoId}
+            setActiveTodoIds={setActiveTodoIds}
           />
         )}
       </div>
-
       <ErrorNotification error={error} setError={setError} />
     </div>
   );

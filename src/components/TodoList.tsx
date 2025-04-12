@@ -1,11 +1,12 @@
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { Todo } from '../types/Todo';
 import TodoItem from './TodoItem';
 
 type Props = {
   filteredTodos: Todo[];
-  activeTodoId: number | null;
+  activeTodoIds: number[];
   tempTodo: Todo | null;
-  setActiveTodoId: React.Dispatch<React.SetStateAction<number | null>>;
+  setActiveTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
   inputRef: React.RefObject<HTMLInputElement>;
@@ -13,8 +14,8 @@ type Props = {
 
 const TodoList = ({
   filteredTodos,
-  activeTodoId,
-  setActiveTodoId,
+  activeTodoIds,
+  setActiveTodoIds,
   tempTodo,
   setError,
   inputRef,
@@ -24,17 +25,20 @@ const TodoList = ({
 
   return (
     <section className="todoapp__main" data-cy="TodoList">
-      {displayTodos.map(todo => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-          activeTodoId={activeTodoId}
-          setActiveTodoId={setActiveTodoId}
-          setError={setError}
-          inputRef={inputRef}
-          setTodos={setTodos}
-        />
-      ))}
+      <TransitionGroup>
+        {displayTodos.map(todo => (
+          <CSSTransition key={todo.id} timeout={300} classNames="item">
+            <TodoItem
+              todo={todo}
+              activeTodoIds={activeTodoIds}
+              setActiveTodoIds={setActiveTodoIds}
+              setError={setError}
+              inputRef={inputRef}
+              setTodos={setTodos}
+            />
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
     </section>
   );
 };

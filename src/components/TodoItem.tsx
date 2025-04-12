@@ -1,10 +1,11 @@
 import classNames from 'classnames';
 import { Todo } from '../types/Todo';
 import { deleteTodo } from '../api/todos';
+
 type Props = {
   todo: Todo;
-  activeTodoId: number | null;
-  setActiveTodoId: React.Dispatch<React.SetStateAction<number | null>>;
+  activeTodoIds: number[]; // Changed to array
+  setActiveTodoIds: React.Dispatch<React.SetStateAction<number[]>>; // Updated
   setError: React.Dispatch<React.SetStateAction<string>>;
   inputRef: React.RefObject<HTMLInputElement>;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
@@ -12,31 +13,31 @@ type Props = {
 
 const TodoItem = ({
   todo,
-  activeTodoId,
+  activeTodoIds,
   setTodos,
-  setActiveTodoId,
+  setActiveTodoIds,
   setError,
   inputRef,
 }: Props) => {
   const { id, title, completed } = todo;
-  const isLoading = id === activeTodoId;
+  const isLoading = activeTodoIds.includes(id);
 
-  const handleDelet = (todoId: number) => {
-    setActiveTodoId(todoId);
+  const handleDelete = (todoId: number) => {
+    setActiveTodoIds(current => [...current, todoId]);
     deleteTodo(todoId)
       .then(() => {
-        setTodos(todos => {
-          return todos.filter(deletedTodo => deletedTodo.id !== todoId);
-        });
+        setTodos(todos =>
+          todos.filter(deletedTodo => deletedTodo.id !== todoId),
+        );
       })
       .catch(() => {
         setError('Unable to delete a todo');
       })
       .finally(() => {
-        setActiveTodoId(null);
-        if (!isLoading) {
-          inputRef.current?.focus();
-        }
+        setActiveTodoIds(current =>
+          current.filter(activeId => activeId !== todoId),
+        ); // Remove from active IDs
+        inputRef.current?.focus();
       });
   };
 
@@ -48,7 +49,7 @@ const TodoItem = ({
         completed: completed,
       })}
     >
-      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+      {/* eslint-disable-next-line */}
       <label className="todo__status-label">
         <input
           data-cy="TodoStatus"
@@ -64,11 +65,10 @@ const TodoItem = ({
         type="button"
         className="todo__remove"
         data-cy="TodoDelete"
-        onClick={() => handleDelet(id)}
+        onClick={() => handleDelete(id)}
       >
         ×
       </button>
-
       <div
         data-cy="TodoLoader"
         className={classNames('modal overlay', {

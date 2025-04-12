@@ -10,7 +10,7 @@ type Props = {
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
   inputRef: React.RefObject<HTMLInputElement>;
-  setActiveTodoId: React.Dispatch<React.SetStateAction<number | null>>;
+  setActiveTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   isLoading: boolean;
 };
 
@@ -46,29 +46,28 @@ const Footer = ({
   setTodos,
   setError,
   inputRef,
-  setActiveTodoId,
+  setActiveTodoIds,
 }: Props) => {
-  const handleClearCompleted = () => {
-    todos
-      .filter(todo => todo.completed)
-      .forEach(completedTodo => {
-        setActiveTodoId(completedTodo.id);
-        deleteTodo(completedTodo.id)
-          .then(() => {
-            setTodos(currentTodos => {
-              return currentTodos.filter(
-                currentTodo => currentTodo.id !== completedTodo.id,
-              );
-            });
-          })
-          .catch(() => {
-            setError('Unable to delete a todo');
-          })
-          .finally(() => {
-            setActiveTodoId(null);
-            inputRef.current?.focus();
-          });
-      });
+  const handleClearCompleted = async () => {
+    const completedTodos = todos.filter(todo => todo.completed);
+
+    if (completedTodos.length === 0) {
+      return;
+    }
+
+    const completedIds = completedTodos.map(todo => todo.id);
+
+    setActiveTodoIds(completedIds);
+
+    try {
+      await Promise.all(completedIds.map(id => deleteTodo(id)));
+      setTodos(currentTodos => currentTodos.filter(todo => !todo.completed));
+    } catch {
+      setError('Unable to delete a todo');
+    } finally {
+      setActiveTodoIds([]);
+      inputRef.current?.focus();
+    }
   };
 
   return (
